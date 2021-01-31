@@ -1,70 +1,34 @@
-# Getting Started with Create React App
+# 아임포트 정기결제 테스트
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 사용
 
-## Available Scripts
+- nodejs
+- react
+- iamport API
 
-In the project directory, you can run:
+## 약간의 정리
 
-### `yarn start`
+- 이니시스 결제를 사용했다.
+- 이니시스 경우 첫결제에 빌링키를 발급받는데, 이 빌링키 결제금액이 0원이 아닐경우 실제 결제된 것처럼 결과가 넘어온다.
+- 결제된 것처럼 이라는건, 실제 금액은 빠져나가지 않지만 만약 웹훅을 사용한다면 결제 금액이 빠져나간 결제와 같은 결과로 넘어오기 때문에 따로 필터링을 해주지 않으면 DB에 결제 정보가 저장될 수 있다. + 빌링키 발급 결제 역시 예약결제로 등록된다.
+- 그럼 빌링키 발급 결제를 0원으로하면 되는것 아닌가? 그러면 이용자가 결제를 누르면 0원으로 나타나기 때문에 결제과정에서 혼란을 초래할 수 있음
+- 그래서, 빌링키 발급시 merchant_uid or name을 빌링키 발급요이라는 것을 기입해서, 결제 중간에 필터를 걸어줘야 한다.
+- 그래야 DB관리, 예약관리에 문제가 생기지 않는다.(생길수도 있지만...? 생긴다면 그때 또 해결하는 걸로)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```md
+결제
+빌링키발급 -> (POST /subscribe/payments/again)-> Webhook -> 빌링키 발급
+빌링키 발급되면 실제결제(파는 상품 결제, 실제 돈이 나가는 결제)가 진행 -> POST /subscribe/payments/again -> webbook
+(결제 완료되면) 결제 정보 저장
+다음 결제 예약
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
++ @  (중간중간 실패에 대한 처리를 해줘야함/ 카드사용기간 만료, 카드 금액부족  등 => 물론 메세지로 넘어옴)
 
-### `yarn test`
+결제 취소의 경우 customer_uid가 필요
+/subscribe/payments/unschedule/{customer_uid}
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 출처
 
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+[연동메뉴얼](https://docs.iamport.kr/)
+[아임포트 API](https://api.iamport.kr/)
