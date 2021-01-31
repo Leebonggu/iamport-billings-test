@@ -22,6 +22,8 @@ function Home() {
     }, rsp => { // callback
       if (rsp.success) {
         // 빌링키 발급 성공
+        console.log('customer_uid', customer_uid);
+        console.log('rsp', rsp);
         axios({
           url: '/billings',
           method: 'post',

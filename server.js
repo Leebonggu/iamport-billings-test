@@ -32,7 +32,7 @@ app.post('/billings', async(req, res) => {
   try {
     console.log('db start billings: ', db)
     const { customer_uid  } = req.body;
-    const merchant_uid = `merchant_uid_${moment().unix()}`; 
+    const merchant_uid = `merchant_uid_첫결제_${moment().unix()}`; 
     const getToken = await axios({
       url: "https://api.iamport.kr/users/getToken",
       method: "post", // POST method
@@ -59,7 +59,7 @@ app.post('/billings', async(req, res) => {
     const { code, message, response } = paymentResult.data;
     if (code === 0) { // 카드사 통신에 성공(실제 승인 성공 여부는 추가 판단이 필요합니다.)
       if ( response.status === "paid" ) { //카드 정상 승인
-        console.log('response', response);
+        console.log('in billing response', response);
         // const { customer_uid, merchant_uid, status, paid_at, amount,name } = response;
         //   const nextPaymentTime = moment(paid_at * 1000).add(3, 'minutes').unix();
         // const data = {
@@ -137,9 +137,9 @@ app.post('/unsubscribe', async (req, res) => {
   const { data: result } = unsubscribeResult;
   console.log(result);
   if (result.code === 0) { 
+    console.log('result', result);
     db[db.length - 1]['authentication'] = false;
     console.log(db); 
-    console.log('result', result);
     return res.send({
       status: true,
       message: '예약이 성공적으로 취소되었습니다',
@@ -150,8 +150,8 @@ app.post('/unsubscribe', async (req, res) => {
 app.post("/iamport-callback/schedule", async (req, res) => {
   const { imp_uid, merchant_uid } = req.body;
   try {
-      console.log('imp_uid',imp_uid);
-      console.log('merchant_uid',merchant_uid);
+      console.log('in callback schedule imp_uid',imp_uid);
+      console.log('in callback schedule merchant_uid',merchant_uid);
       console.log('db in callback/schedule 1: ', db);
       const getToken = await axios({
         url: "https://api.iamport.kr/users/getToken",
@@ -170,7 +170,7 @@ app.post("/iamport-callback/schedule", async (req, res) => {
       });
 
       // console.log('getPaymentData', getPaymentData);
-      console.log('getPaymentData.data.response', getPaymentData.data.response);
+      console.log('in callback schedule getPaymentData.data.response', getPaymentData.data.response);
 
       const { status, customer_uid, message, paid_at, amount, name, buyer_name ,buyer_tel, buyer_email } = getPaymentData.data.response;
       // console.log('getPaymentData', getPaymentData);
@@ -180,7 +180,7 @@ app.post("/iamport-callback/schedule", async (req, res) => {
         // 예약결제 시간
         const nextPaymentTime = moment(paid_at * 1000).add(3, 'minutes').unix();
         // 예약결제 merchant_uid
-        const nextMerchantId = `merchant_uid_${nextPaymentTime}`;
+        const nextMerchantId = `merchant_uid_다음결제_${nextPaymentTime}`;
         // if (name !== '최초인증결제') {
         // }
         const splitedMerchantKey = merchant_uid.split('_');
