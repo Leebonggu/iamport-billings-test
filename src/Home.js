@@ -7,9 +7,22 @@ import moment from 'moment';
 
 function Home() {
   const [loading, setLaoding] = useState(false);
+  const [connection, setConnection] = useState('');
+  const [db, setDb] = useState([]);
   const [resultMessage, setResultMessage] = useState('');
+
+  useEffect(() => {
+    axios.get('/home')
+      .then(({ data }) => {
+        console.log(data);
+        setConnection(data.connect)
+        setDb(...db, data.database);
+      })
+  }, [])
+  
   const onSubmitPayment = (e) => {
     e.preventDefault();
+    setResultMessage('')
     const merchant_uid = `issue_billing_key_monthly_${moment().unix()}`
     const customer_uid = `customer_uid_${moment().unix()}`;
     window.IMP.request_pay({ // param
@@ -58,25 +71,41 @@ function Home() {
       headers: { "Content-Type": "application/json" },
     });
     handleResultMessage(result)
-  }
+  };
+
+  const onSubmitUpdateDatabase = async (e) => {
+    e.preventDefault();
+    axios.get('/update')
+      .then(({ data }) => console.log(data));
+  } 
 
   const handleResultMessage = (res) => {
     setResultMessage(res);
-    setTimeout(() => {
-      setResultMessage('');
-    }, 3000);
   }
-
+  console.log(db);
   return (
     <div>
       <h1>아임포트 정기결제 테스트</h1>
       {resultMessage && <span style={{ color: `${resultMessage.status ? 'blue': 'red'}` }}>{resultMessage.message}</span>}
+      <div>Connect: {connection ? connection : '연결중...'}</div>
       <form onSubmit={onSubmitPayment}>
         <button type="submit">결제</button> 
       </form>
       <form onSubmit={onSubmitUnsubscribe}>
         <button type="submit">취소</button> 
       </form>
+      <form onSubmit={onSubmitUpdateDatabase}>
+        <button type="submit">업데이트</button> 
+      </form>
+      <div>
+        {db.length ? (
+        <>
+          {db.map(e => (JSON.stringify(e)))}
+        </>
+          ) : (
+          <div>연결중...</div>
+        )}
+      </div>
     </div>
   )
 }

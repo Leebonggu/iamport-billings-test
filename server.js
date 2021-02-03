@@ -24,8 +24,34 @@ app.use(bodyParser.json());
 
 app.get('/home', (req, res) => {
   console.log('db0', database);
-  res.status(200).send('Connect Succes');
+  res.status(200).send({
+    connect: 'Connect',
+    database: db,
+  });
 });
+
+app.get('/update', (req, res) => {
+    // merchant_uid,
+    // status,
+    // customer_uid,
+    // paid_at,
+    // next_paid_at: nextPaymentTime,
+    // amount,
+    // name,
+    // authentication: true,
+    // cancel: false,
+    // cancel_request_date: null,
+    // cancel_process_date: null,
+  db.forEach((e) => {
+    if (e.cancel) {
+      if (e.next_paid_at < moment().unix()) {
+        e['cancel_process_date'] = moment().unix();
+        e['authentication'] = false;
+      }
+    }
+  })
+  res.send('helloo');
+})
 
 
 app.post('/billings', async(req, res) => {
@@ -78,8 +104,7 @@ app.post('/billings', async(req, res) => {
           message: '예약이 성공적으로  이루어졌습니다.',
         });
       } else { //카드 승인 실패 (ex. 고객 카드 한도초과, 거래정지카드, 잔액부족 등)
-        console.log(message);
-        console.log(response.fail_reason);
+
         return res.send({
           status: false,
           message: response.fail_reason,
@@ -135,11 +160,23 @@ app.post('/unsubscribe', async (req, res) => {
   console.log('cancel subscribe end');
   // console.log('unsubscribeResult', unsubscribeResult);
   const { data: result } = unsubscribeResult;
-  console.log(result);
+  // console.log(result);
   if (result.code === 0) { 
     console.log('result', result);
-    db[db.length - 1]['authentication'] = false;
-    console.log(db); 
+    const index = db.length - 1;
+    db[index]['cancel'] = true;
+    db[index]['cancel_request_date'] = moment().unix();
+    // merchant_uid,
+    // status,
+    // customer_uid,
+    // paid_at,
+    // next_paid_at: nextPaymentTime,
+    // amount,
+    // name,
+    // authentication: true,
+    // cancel: false,
+    // cancel_request_date: null,
+    // cancel_process_date: null,
     return res.send({
       status: true,
       message: '예약이 성공적으로 취소되었습니다',
@@ -194,8 +231,12 @@ app.post("/iamport-callback/schedule", async (req, res) => {
             amount,
             name,
             authentication: true,
+            cancel: false,
+            cancel_request_date: null,
+            cancel_process_date: null,
           }
           db.push(data);
+          console.log(db);
         } else {
           return res.send({
             status: true,

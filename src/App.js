@@ -11,7 +11,6 @@ import Home from './Home';
 function App() {
   useEffect(() => {
     window.IMP.init('imp59902979');
-    axios.get('/home').then(({ data: d }) => console.log(d));
   }, []);
 
   return (
