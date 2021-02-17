@@ -4,9 +4,18 @@ import {
   Switch,
   Route,
 } from "react-router-dom";
-import axios from 'axios';
-import Complete from './Complete';
+import { createGlobalStyle } from 'styled-components';
 import Home from './Home';
+import Complete from './Complete';
+import Billings from './Billings';
+import Header from './Header';
+import Kakaopay from './Kakaopay';
+import Naverpay from './Naverpay';
+
+
+const Global = createGlobalStyle`
+  height: 1800px;
+`;
 
 function App() {
   useEffect(() => {
@@ -14,16 +23,29 @@ function App() {
   }, []);
 
   return (
-    <Router>
-        <Switch>
-          <Route exact path="/">
-            <Home />
-          </Route>
-          <Route exact path="/complete">
-            <Complete />
-          </Route>
-        </Switch>
-    </Router>
+    <>
+      <Global />
+      <Router>
+          <Header />
+          <Switch>
+            <Route exact path="/billings">
+              <Billings />
+            </Route>
+            <Route exact path="/kakao">
+              <Kakaopay />
+            </Route>
+            <Route exact path="/naver">
+              <Naverpay />
+            </Route>
+            <Route exact path="/complete">
+              <Complete />
+            </Route>
+            <Route exact path="/">
+              <Home />
+            </Route>
+          </Switch>
+      </Router>
+    </>
   );
 }
 
