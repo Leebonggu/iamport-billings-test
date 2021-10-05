@@ -4,7 +4,7 @@
 
 ### 사용
 
-- nodejs
+- nodejs(express)
 - react
 - iamport API
 
@@ -44,5 +44,3 @@
 
 [연동메뉴얼](https://docs.iamport.kr/)
 [아임포트 API](https://api.iamport.kr/)
-
-## 2. 아임포트 일반결제
